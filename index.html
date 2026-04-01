@@ -946,6 +946,9 @@ body.success-bg{
     <a href="https://youtu.be/EDq9jTP_CKU?si=CWmIYdXp1CyHR0q5" target="_blank" class="step-btn disabled" id="step3" onclick="unlockStep(3)">
         <svg class="btn-icon" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 2.14-1.18l3.71-8.64c.06-.17.1-.36.1-.55V10z"/></svg> 3. Dale Like al video
     </a>
+    <a href="https://youtu.be/ds7pBo57jp0?si=JbKdzR0Qzxgjoo1V" target="_blank" class="step-btn disabled" id="step4" onclick="unlockStep(4)">
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 2.14-1.18l3.71-8.64c.06-.17.1-.36.1-.55V10z"/></svg> 4. Dale Like al video (2)
+    </a>
 
     <!-- BARRA DE PROGRESO -->
     <div class="progress-container" id="progressContainer">
@@ -1119,6 +1122,12 @@ function unlockStep(step){
             pendingStep = 3;
             showToast("ℹ Regresa aquí después de dar like");
         }
+    } else if(step === 4){
+        const btn4 = document.getElementById('step4');
+        if(!btn4.classList.contains('completed')) {
+            pendingStep = 4;
+            showToast("ℹ Regresa aquí después de dar like al segundo video");
+        }
     }
 }
 
@@ -1177,7 +1186,7 @@ function startVerification(step){
         }, 1000);
     } else if(step === 3){
         const btn3 = document.getElementById('step3');
-        const dlBtn = document.getElementById('downloadBtn');
+        const btn4 = document.getElementById('step4');
         
         if(btn3.classList.contains('completed') || btn3.innerHTML.includes("Verificando")) return;
 
@@ -1193,19 +1202,39 @@ function startVerification(step){
                 btn3.classList.remove('verifying');
                 btn3.classList.add('completed');
                 btn3.innerHTML = `${icons.check} Likeado`;
+                btn4.classList.remove('disabled'); // Habilitar el siguiente paso
+                showToast("✅ Paso 3 completado");
+            }
+        }, 1000);
+    } else if(step === 4){ // Nuevo paso 4
+        const btn4 = document.getElementById('step4');
+        const dlBtn = document.getElementById('downloadBtn');
+        
+        if(btn4.classList.contains('completed') || btn4.innerHTML.includes("Verificando")) return;
+
+        let timeLeft = 5;
+        btn4.innerHTML = `${icons.time} Verificando... ${timeLeft}s`;
+        btn4.classList.add('verifying');
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            btn4.innerHTML = `${icons.time} Verificando... ${timeLeft}s`;
+            if(timeLeft <= 0){
+                clearInterval(timer);
+                btn4.classList.remove('verifying');
+                btn4.classList.add('completed');
+                btn4.innerHTML = `${icons.check} Likeado (2)`;
+                showToast("✅ Paso 4 completado");
                 
-                // INICIAR BARRA DE PROGRESO
-                const progContainer = document.getElementById('progressContainer');
-                const progBar = document.getElementById('progressBar');
                 const consoleBox = document.getElementById('consoleBox');
                 const consoleContent = document.getElementById('consoleContent');
-                
+                const progContainer = document.getElementById('progressContainer');
+                const progBar = document.getElementById('progressBar');
+
                 progContainer.style.display = 'block';
                 consoleBox.style.display = 'block';
-                
+
                 let width = 0;
-                
-                // Mensajes de consola falsos
                 const logs = [
                     "Iniciando conexión segura...",
                     "Bypassing firewall...",
@@ -1221,37 +1250,33 @@ function startVerification(step){
                 const progInterval = setInterval(() => {
                     width++;
                     progBar.style.width = width + '%';
-                    
                     if(width < 40) progBar.innerHTML = `Conectando servidor... ${width}%`;
                     else if(width < 80) progBar.innerHTML = `Generando enlace... ${width}%`;
                     else progBar.innerHTML = `Finalizando... ${width}%`;
 
-                    // Agregar logs a la consola basado en el progreso
                     if (width % 12 === 0 && logs.length > 0) {
                         const logMsg = logs.shift();
-                        if(logMsg) {
-                            const p = document.createElement('div');
-                            p.className = 'log-line';
-                            p.innerHTML = `> ${logMsg}`;
-                            consoleContent.appendChild(p);
-                            consoleBox.scrollTop = consoleBox.scrollHeight;
-                        }
+                        const p = document.createElement('div');
+                        p.className = 'log-line';
+                        p.innerHTML = `> ${logMsg}`;
+                        consoleContent.appendChild(p);
+                        consoleBox.scrollTop = consoleBox.scrollHeight;
                     }
 
                     if(width >= 100){
                         clearInterval(progInterval);
                         setTimeout(() => {
-                            progContainer.style.display = 'none'; // Ocultar barra al finalizar
-                            consoleBox.style.display = 'none'; // Ocultar consola al finalizar
+                            progContainer.style.display = 'none';
+                            consoleBox.style.display = 'none';
                             dlBtn.classList.remove('disabled');
                             dlBtn.classList.add('unlocked');
                             dlBtn.innerHTML = `${icons.download} DESCARGAR PANEL`;
                             document.body.classList.add('success-bg');
-                            matrixColor = "#00ff88"; // Cambiar matrix a verde al finalizar
+                            matrixColor = "#00ff88";
                             showToast("🔓 ¡Acceso concedido!");
                         }, 500);
                     }
-                }, 40); // Velocidad de carga (menor número = más rápido)
+                }, 40);
             }
         }, 1000);
     }
